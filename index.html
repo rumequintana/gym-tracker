@@ -969,7 +969,7 @@
         render();
       }catch(err){
         console.error(err);
-        alert('No se pudo importar. Comprueba que la URL es correcta y que has vuelto a implementar el script como "Nueva versión" después de actualizar el código con doGet.');
+        alert('No se pudo importar. Detalle: ' + (err && err.message ? err.message : err));
         render();
       }
       return;
