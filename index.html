@@ -496,6 +496,7 @@
       <div class="sub">${sub}</div>
       ${cards}
       <button class="btn btn-primary" data-action="start-proposed" data-day="${day.name}">Empezar este entreno</button>
+      <button class="btn btn-ghost" data-action="go-registrar">Elegir otro día de mi rutina</button>
       <button class="btn btn-ghost" data-action="go-cardio">¿Hoy toca cardio? Regístralo aquí</button>
     </div>`;
   }
@@ -503,11 +504,15 @@
   function renderRegistrar(){
     if(cardioFormOpen) return renderCardioForm();
     if(!draft){
-      const day = nextDay();
+      const proposed = nextDay();
+      const dayButtons = routine.map(d=>{
+        const isProposed = proposed && d.name===proposed.name;
+        return `<button class="btn ${isProposed?'btn-primary':'btn-secondary'}" data-action="start-proposed" data-day="${d.name}">${d.name}${isProposed?' (propuesto)':''}</button>`;
+      }).join('');
       return `<div class="empty-state">
-        <p>No tienes ningún entreno en curso.</p>
-        ${day ? `<button class="btn btn-primary" data-action="start-proposed" data-day="${day.name}">Empezar entreno propuesto: ${day.name}</button>` : ''}
-        <button class="btn btn-secondary" data-action="start-free">Entreno libre</button>
+        <p>¿Qué entreno quieres registrar hoy?</p>
+        ${dayButtons}
+        <button class="btn btn-ghost" data-action="start-free">Entreno libre</button>
         <button class="btn btn-ghost" data-action="open-cardio">Registrar cardio</button>
       </div>`;
     }
@@ -743,6 +748,7 @@
           <button class="btn btn-primary" data-action="sync-all">Sincronizar todo</button>
         </div>
         <button class="btn btn-secondary" data-action="import-sheet" style="margin-top:10px;">Importar de la hoja</button>
+        <button class="btn btn-ghost" data-action="replace-with-sheet" style="margin-top:10px;">Borrar pruebas locales y quedarme solo con la hoja</button>
       </div>
     </div>`;
   }
@@ -773,6 +779,9 @@
     if(!t) return;
     const action = t.dataset.action;
 
+    if(action==='go-registrar'){
+      activeTab='registrar'; render(); return;
+    }
     if(action==='go-cardio'){
       activeTab='registrar'; cardioFormOpen=true; render(); return;
     }
@@ -949,6 +958,34 @@
       }catch(err){
         console.error(err);
         alert('No se pudo importar (fallo de red en este momento). Prueba otra vez, a ser posible con wifi. Detalle: ' + (err && err.message ? err.message : err));
+        render();
+      }
+      return;
+    }
+
+    if(action==='replace-with-sheet'){
+      if(!syncUrl){ alert('Primero guarda la URL de Apps Script.'); return; }
+      if(!confirm('Esto borra TODOS los entrenos, pesos y cardios guardados en este dispositivo y los sustituye exactamente por lo que hay en la hoja de Google. ¿Continuar?')) return;
+      t.disabled = true; t.textContent = 'Reemplazando…';
+      try{
+        const data = await pullFromSheet();
+        sessions = (data.sessions||[]).map(s=>({ id:uid(), date:s.date, dayName:s.dayName, exercises:s.exercises||[] }));
+        bodyweight = (data.bodyweight||[]).reduce((acc,b)=>{ acc[b.date] = b.weight; return acc; }, {});
+        bodyweight = Object.keys(bodyweight).sort().map(date=>({date, weight:bodyweight[date]}));
+        cardio = (data.cardio||[]).map(c=>({ id:uid(), date:c.date, activity:c.activity, minutes:c.minutes, distance:c.distance, calories:c.calories }));
+        await setJSON('sessions', sessions);
+        await setJSON('bodyweight', bodyweight);
+        await setJSON('cardio', cardio);
+        syncedKeys = new Set();
+        sessions.forEach(s=>syncedKeys.add('session:'+s.id));
+        bodyweight.forEach(b=>syncedKeys.add('bw:'+b.date+':'+b.weight));
+        cardio.forEach(c=>syncedKeys.add('cardio:'+c.id));
+        await setJSON('syncedKeys', Array.from(syncedKeys));
+        alert('Listo: los datos locales ahora coinciden exactamente con la hoja.');
+        render();
+      }catch(err){
+        console.error(err);
+        alert('No se pudo reemplazar. Detalle: ' + (err && err.message ? err.message : err));
         render();
       }
       return;
