@@ -193,6 +193,7 @@
       {name:"Plancha", group:"Core", sets:3, reps:40, inc:0, bodyweight:true, unit:"seg", info:"Antebrazos y puntas de los pies en el suelo, cuerpo en línea recta de cabeza a talones; aprieta abdomen y glúteos sin dejar caer la cadera."},
       {name:"Elevación de piernas colgado", group:"Core", sets:3, reps:12, inc:0, bodyweight:true, unit:"reps", info:"Colgado de la barra, eleva las piernas rectas o flexionadas hasta la horizontal controlando el balanceo, sin impulso."},
       {name:"Vacuum abdominal", group:"Core", sets:3, reps:20, inc:0, bodyweight:true, unit:"seg", info:"De pie o a cuatro patas, expulsa todo el aire y mete el ombligo hacia dentro y arriba como si quisieras tocar la columna; aguanta sin coger aire. Trabaja el transverso y la fascia abdominal profunda."},
+      {name:"Crunch", group:"Core", sets:3, reps:15, inc:0, bodyweight:true, unit:"reps", info:"Tumbado con rodillas flexionadas y manos detrás de la cabeza sin tirar del cuello, eleva los omóplatos del suelo contrayendo el abdomen y baja controlado."},
     ]},
     { name:"Espalda", exercises:[
       {name:"Jalón al pecho", group:"Espalda", sets:4, reps:8, inc:2.5, info:"Agarre algo más ancho que los hombros; tira la barra hacia la parte alta del pecho llevando los codos hacia abajo y atrás."},
@@ -202,6 +203,7 @@
       {name:"Superman", group:"Core", sets:3, reps:15, inc:0, bodyweight:true, unit:"reps", info:"Boca abajo, eleva a la vez brazos y piernas estiradas unos centímetros; aprieta la zona lumbar y baja controlado."},
       {name:"Pallof press", group:"Core", sets:3, reps:12, inc:1, info:"De pie, en posición lateral a la polea; empuja la agarradera hacia delante resistiendo la rotación del tronco."},
       {name:"Dead bug", group:"Core", sets:3, reps:12, inc:0, bodyweight:true, unit:"reps", info:"Tumbado boca arriba, brazos arriba y rodillas a 90°; baja un brazo y la pierna contraria a la vez manteniendo la zona lumbar pegada al suelo, sin arquear la espalda."},
+      {name:"Crunch en polea", group:"Core", sets:3, reps:12, inc:2.5, info:"De rodillas frente a la polea alta con la cuerda detrás de la cabeza, flexiona el tronco llevando los codos hacia las rodillas contrayendo el abdomen, sin tirar con los brazos."},
     ]},
     { name:"Piernas", exercises:[
       {name:"Sentadilla", group:"Piernas", sets:4, reps:8, inc:2.5, info:"Barra sobre los trapecios; baja llevando la cadera atrás y abajo hasta romper el paralelo, rodillas en línea con los pies."},
@@ -211,6 +213,7 @@
       {name:"Elevación de gemelos", group:"Piernas", sets:4, reps:15, inc:2, info:"De pie o en máquina, sube el talón al máximo y baja controlado hasta notar estiramiento en la pantorrilla."},
       {name:"Russian twist", group:"Core", sets:3, reps:20, inc:0, bodyweight:true, unit:"reps", info:"Sentado con el tronco algo reclinado, rota el tronco de lado a lado llevando las manos junto a la cadera."},
       {name:"Vacuum abdominal", group:"Core", sets:3, reps:20, inc:0, bodyweight:true, unit:"seg", info:"De pie o a cuatro patas, expulsa todo el aire y mete el ombligo hacia dentro y arriba como si quisieras tocar la columna; aguanta sin coger aire. Trabaja el transverso y la fascia abdominal profunda."},
+      {name:"Crunch bicicleta", group:"Core", sets:3, reps:20, inc:0, bodyweight:true, unit:"reps", info:"Tumbado, lleva el codo hacia la rodilla contraria mientras extiendes la otra pierna, alternando de forma continua y controlada."},
     ]},
     { name:"Brazos", exercises:[
       {name:"Curl bíceps barra", group:"Brazos", sets:3, reps:10, inc:1, info:"Codos pegados al cuerpo; sube la barra flexionando el codo sin balancear el tronco, baja controlado."},
@@ -220,6 +223,7 @@
       {name:"Elevaciones laterales", group:"Brazos", sets:3, reps:12, inc:1, info:"Mancuernas a los lados; eleva los brazos hasta la altura de los hombros con el codo ligeramente flexionado, sin impulso."},
       {name:"Plancha lateral", group:"Core", sets:3, reps:30, inc:0, bodyweight:true, unit:"seg", info:"Apoyado en un antebrazo y el lateral del pie, mantén el cuerpo en línea recta sin dejar caer la cadera; cambia de lado."},
       {name:"Dead bug", group:"Core", sets:3, reps:12, inc:0, bodyweight:true, unit:"reps", info:"Tumbado boca arriba, brazos arriba y rodillas a 90°; baja un brazo y la pierna contraria a la vez manteniendo la zona lumbar pegada al suelo, sin arquear la espalda."},
+      {name:"Crunch con peso", group:"Core", sets:3, reps:15, inc:1, info:"Tumbado con rodillas flexionadas, sujeta un disco o mancuerna contra el pecho y eleva los omóplatos del suelo contrayendo el abdomen."},
     ]},
   ];
 
@@ -231,6 +235,8 @@
   let activeTab = "hoy";
   let progressExercise = null;
   let cardio = null;
+  let syncUrl = "";
+  let syncedKeys = new Set();
   let cardioFormOpen = false;
   let pendingCardio = null;
   let progressCardioActivity = null;
@@ -245,6 +251,23 @@
   function setJSON(key, val){
     try{ localStorage.setItem(STORAGE_PREFIX+key, JSON.stringify(val)); }
     catch(e){ console.error("storage set failed", key, e); }
+  }
+
+  function pushRecord(type, payload, key){
+    if(!syncUrl) return;
+    if(key){
+      if(syncedKeys.has(key)) return;
+      syncedKeys.add(key);
+      setJSON('syncedKeys', Array.from(syncedKeys));
+    }
+    try{
+      fetch(syncUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify(Object.assign({type}, payload))
+      });
+    }catch(e){ console.error('sync failed', e); }
   }
 
   function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -658,7 +681,17 @@
         <button class="add-rex" data-action="add-rex" data-day="${dIdx}">+ Añadir ejercicio</button>
       </div>`;
     }).join('');
-    return `<div>${blocks}<button class="btn btn-secondary add-day-btn" data-action="add-day">+ Añadir día</button></div>`;
+    return `<div>${blocks}<button class="btn btn-secondary add-day-btn" data-action="add-day">+ Añadir día</button>
+      <div class="day-block" style="margin-top:20px;">
+        <h3 style="font-size:16px;margin-bottom:10px;">Sincronización con Google Sheets</h3>
+        <p style="font-size:13px;color:var(--text-dim);margin:0 0 10px;">Pega aquí la URL de tu Apps Script para que cada entreno, peso y cardio se envíe también a una hoja de cálculo.</p>
+        <input type="text" id="syncUrlInput" placeholder="https://script.google.com/macros/s/..." value="${syncUrl}" style="margin-bottom:10px;">
+        <div class="btn-row">
+          <button class="btn btn-secondary" data-action="save-sync-url">Guardar URL</button>
+          <button class="btn btn-primary" data-action="sync-all">Sincronizar todo</button>
+        </div>
+      </div>
+    </div>`;
   }
 
   // ---------- events ----------
@@ -713,9 +746,12 @@
       return;
     }
     if(action==='save-cardio'){
-      cardio.push({ id:uid(), date:todayISO(), activity:pendingCardio.activity,
-        minutes:pendingCardio.minutes, distance:pendingCardio.distance, calories:pendingCardio.calories });
+      const rec = { date:todayISO(), activity:pendingCardio.activity,
+        minutes:pendingCardio.minutes, distance:pendingCardio.distance, calories:pendingCardio.calories };
+      const newId = uid();
+      cardio.push(Object.assign({id:newId}, rec));
       await setJSON('cardio', cardio);
+      pushRecord('cardio', rec, 'cardio:'+newId);
       cardioFormOpen=false; pendingCardio=null;
       render(); return;
     }
@@ -801,8 +837,10 @@
         name:e.name, sets:e.sets, zone:e.zone||'Otros', bodyweight:!!e.bodyweight, unit:e.unit||'reps'
       }));
       if(!cleaned.length){ alert('Añade al menos una serie antes de guardar.'); return; }
-      sessions.push({ id:uid(), date:draft.date, dayName:draft.dayName, exercises:cleaned });
+      const sessionId = uid();
+      sessions.push({ id:sessionId, date:draft.date, dayName:draft.dayName, exercises:cleaned });
       await setJSON('sessions', sessions);
+      pushRecord('session', { date:draft.date, dayName:draft.dayName, exercises:cleaned }, 'session:'+sessionId);
       draft = null;
       await setJSON('draft', null);
       activeTab='hoy'; render(); return;
@@ -819,10 +857,27 @@
       if(idx>=0) bodyweight[idx].weight = pendingBW; else bodyweight.push({date:today, weight:pendingBW});
       bodyweight.sort((a,b)=>a.date.localeCompare(b.date));
       await setJSON('bodyweight', bodyweight);
+      pushRecord('bodyweight', { date:today, weight:pendingBW }, 'bw:'+today+':'+pendingBW);
       render(); return;
     }
 
     // rutina
+    if(action==='save-sync-url'){
+      const input = document.getElementById('syncUrlInput');
+      syncUrl = input.value.trim();
+      await setJSON('syncUrl', syncUrl);
+      alert(syncUrl ? 'URL guardada. A partir de ahora se sincronizará automáticamente.' : 'URL borrada. Ya no se sincronizará.');
+      return;
+    }
+    if(action==='sync-all'){
+      if(!syncUrl){ alert('Primero guarda la URL de Apps Script.'); return; }
+      sessions.forEach(s=>pushRecord('session', { date:s.date, dayName:s.dayName, exercises:s.exercises }, 'session:'+s.id));
+      bodyweight.forEach(b=>pushRecord('bodyweight', { date:b.date, weight:b.weight }, 'bw:'+b.date+':'+b.weight));
+      cardio.forEach(c=>pushRecord('cardio', { date:c.date, activity:c.activity, minutes:c.minutes, distance:c.distance, calories:c.calories }, 'cardio:'+c.id));
+      alert('Enviando lo que falte por sincronizar. Los registros que ya se enviaron antes no se duplican.');
+      return;
+    }
+
     if(action==='add-day'){
       routine.push({ name:'Nuevo día', exercises:[] });
       await setJSON('routine', routine); render(); return;
@@ -888,6 +943,8 @@
     draft = await getJSON('draft', null);
     bodyweight = await getJSON('bodyweight', []);
     cardio = await getJSON('cardio', []);
+    syncUrl = await getJSON('syncUrl', "");
+    syncedKeys = new Set(await getJSON('syncedKeys', []));
     render();
   }
   init();
