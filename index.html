@@ -270,6 +270,62 @@
     }catch(e){ console.error('sync failed', e); }
   }
 
+  function pullFromSheet(){
+    return new Promise((resolve, reject)=>{
+      if(!syncUrl){ reject(new Error('no url')); return; }
+      const cbName = 'gymlogImport_' + Date.now();
+      const script = document.createElement('script');
+      const cleanup = ()=>{ try{ delete window[cbName]; }catch(e){} script.remove(); };
+      const timer = setTimeout(()=>{ cleanup(); reject(new Error('timeout')); }, 15000);
+      window[cbName] = function(data){
+        clearTimeout(timer);
+        cleanup();
+        resolve(data);
+      };
+      const sep = syncUrl.indexOf('?')>=0 ? '&' : '?';
+      script.src = syncUrl + sep + 'callback=' + cbName;
+      script.onerror = ()=>{ clearTimeout(timer); cleanup(); reject(new Error('load error')); };
+      document.head.appendChild(script);
+    });
+  }
+
+  function mergeImportedData(remote){
+    let addedSessions = 0, addedBW = 0, addedCardio = 0;
+    const localSessionKeys = new Set(sessions.map(s=>s.date+'|'+s.dayName));
+    (remote.sessions||[]).forEach(rs=>{
+      const key = rs.date+'|'+rs.dayName;
+      if(!localSessionKeys.has(key)){
+        sessions.push({ id:uid(), date:rs.date, dayName:rs.dayName, exercises:rs.exercises||[] });
+        localSessionKeys.add(key);
+        addedSessions++;
+      }
+    });
+    sessions.sort((a,b)=>a.date.localeCompare(b.date));
+
+    const localBWDates = new Set(bodyweight.map(b=>b.date));
+    (remote.bodyweight||[]).forEach(rb=>{
+      if(!localBWDates.has(rb.date)){
+        bodyweight.push({ date:rb.date, weight:rb.weight });
+        localBWDates.add(rb.date);
+        addedBW++;
+      }
+    });
+    bodyweight.sort((a,b)=>a.date.localeCompare(b.date));
+
+    const localCardioKeys = new Set(cardio.map(c=>[c.date,c.activity,c.minutes,c.distance,c.calories].join('|')));
+    (remote.cardio||[]).forEach(rc=>{
+      const key = [rc.date,rc.activity,rc.minutes,rc.distance,rc.calories].join('|');
+      if(!localCardioKeys.has(key)){
+        cardio.push({ id:uid(), date:rc.date, activity:rc.activity, minutes:rc.minutes, distance:rc.distance, calories:rc.calories });
+        localCardioKeys.add(key);
+        addedCardio++;
+      }
+    });
+    cardio.sort((a,b)=>a.date.localeCompare(b.date));
+
+    return { addedSessions, addedBW, addedCardio };
+  }
+
   function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
   function fmtDate(iso){
     const d = new Date(iso+"T00:00:00");
@@ -690,6 +746,7 @@
           <button class="btn btn-secondary" data-action="save-sync-url">Guardar URL</button>
           <button class="btn btn-primary" data-action="sync-all">Sincronizar todo</button>
         </div>
+        <button class="btn btn-secondary" data-action="import-sheet" style="margin-top:10px;">Importar de la hoja</button>
       </div>
     </div>`;
   }
@@ -875,6 +932,29 @@
       bodyweight.forEach(b=>pushRecord('bodyweight', { date:b.date, weight:b.weight }, 'bw:'+b.date+':'+b.weight));
       cardio.forEach(c=>pushRecord('cardio', { date:c.date, activity:c.activity, minutes:c.minutes, distance:c.distance, calories:c.calories }, 'cardio:'+c.id));
       alert('Enviando lo que falte por sincronizar. Los registros que ya se enviaron antes no se duplican.');
+      return;
+    }
+
+    if(action==='import-sheet'){
+      if(!syncUrl){ alert('Primero guarda la URL de Apps Script.'); return; }
+      t.disabled = true; t.textContent = 'Importando…';
+      try{
+        const data = await pullFromSheet();
+        const res = mergeImportedData(data);
+        await setJSON('sessions', sessions);
+        await setJSON('bodyweight', bodyweight);
+        await setJSON('cardio', cardio);
+        sessions.forEach(s=>syncedKeys.add('session:'+s.id));
+        bodyweight.forEach(b=>syncedKeys.add('bw:'+b.date+':'+b.weight));
+        cardio.forEach(c=>syncedKeys.add('cardio:'+c.id));
+        await setJSON('syncedKeys', Array.from(syncedKeys));
+        alert(`Importado: ${res.addedSessions} entreno(s), ${res.addedBW} peso(s), ${res.addedCardio} cardio(s) nuevos.`);
+        render();
+      }catch(err){
+        console.error(err);
+        alert('No se pudo importar. Comprueba que la URL es correcta y que has vuelto a implementar el script como "Nueva versión" después de actualizar el código con doGet.');
+        render();
+      }
       return;
     }
 
