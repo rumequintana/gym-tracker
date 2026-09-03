@@ -757,7 +757,7 @@
     return `<div>${blocks}<button class="btn btn-secondary add-day-btn" data-action="add-day">+ Añadir día</button>
       <div class="day-block" style="margin-top:20px;">
         <h3 style="font-size:16px;margin-bottom:10px;">Sincronización con Google Sheets</h3>
-        <p style="font-size:13px;color:var(--text-dim);margin:0 0 10px;">Pega aquí la URL de tu Apps Script para que cada entreno, peso y cardio se envíe también a una hoja de cálculo.</p>
+        <p style="font-size:13px;color:var(--text-dim);margin:0 0 10px;">Pega aquí la URL de tu Apps Script para enviar cada entreno, peso y cardio a una hoja de cálculo, y para importar lo que se haya registrado desde otro dispositivo.</p>
         <input type="text" id="syncUrlInput" placeholder="https://script.google.com/macros/s/..." value="${syncUrl}" style="margin-bottom:10px;">
         <div class="btn-row">
           <button class="btn btn-secondary" data-action="save-sync-url">Guardar URL</button>
@@ -969,7 +969,7 @@
         render();
       }catch(err){
         console.error(err);
-        alert('No se pudo importar. Detalle: ' + (err && err.message ? err.message : err));
+        alert('No se pudo importar (fallo de red en este momento). Prueba otra vez, a ser posible con wifi. Detalle: ' + (err && err.message ? err.message : err));
         render();
       }
       return;
