@@ -275,16 +275,33 @@
       if(!syncUrl){ reject(new Error('no url')); return; }
       const cbName = 'gymlogImport_' + Date.now();
       const script = document.createElement('script');
-      const cleanup = ()=>{ try{ delete window[cbName]; }catch(e){} script.remove(); };
-      const timer = setTimeout(()=>{ cleanup(); reject(new Error('timeout')); }, 15000);
+      let settled = false;
+      const cleanup = ()=>{
+        window[cbName] = function(){}; // evita ReferenceError si la respuesta llega tarde
+        script.remove();
+      };
+      const timer = setTimeout(()=>{
+        if(settled) return;
+        settled = true;
+        cleanup();
+        reject(new Error('timeout'));
+      }, 45000);
       window[cbName] = function(data){
+        if(settled) return;
+        settled = true;
         clearTimeout(timer);
         cleanup();
         resolve(data);
       };
       const sep = syncUrl.indexOf('?')>=0 ? '&' : '?';
       script.src = syncUrl + sep + 'callback=' + cbName;
-      script.onerror = ()=>{ clearTimeout(timer); cleanup(); reject(new Error('load error')); };
+      script.onerror = ()=>{
+        if(settled) return;
+        settled = true;
+        clearTimeout(timer);
+        cleanup();
+        reject(new Error('load error'));
+      };
       document.head.appendChild(script);
     });
   }
@@ -937,7 +954,7 @@
 
     if(action==='import-sheet'){
       if(!syncUrl){ alert('Primero guarda la URL de Apps Script.'); return; }
-      t.disabled = true; t.textContent = 'Importando…';
+      t.disabled = true; t.textContent = 'Importando… (puede tardar hasta 30s)';
       try{
         const data = await pullFromSheet();
         const res = mergeImportedData(data);
