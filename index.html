@@ -142,7 +142,8 @@
   .rex-row{ margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--steel); }
   .rex-row:last-of-type{ border-bottom:none; margin-bottom:6px; padding-bottom:0; }
   .rex-name{ margin-bottom:6px; font-size:14px; }
-  .rex-meta{ display:flex; gap:6px; align-items:center; }
+  .rex-meta{ display:flex; gap:6px; align-items:flex-end; }
+  .rex-field{ display:flex; flex-direction:column; }
   .rex-meta select{ flex:1.4; font-size:12px; padding:8px 6px; }
   .rex-num{ width:46px; text-align:center; padding:8px 4px; flex-shrink:0; }
   .rex-meta .rm-rex{ background:none; border:none; color:var(--text-dim); font-size:16px; cursor:pointer; padding:4px 6px; flex-shrink:0; }
@@ -182,7 +183,7 @@
   "use strict";
 
   const ZONES = ["Pecho","Espalda","Piernas","Brazos","Core"];
-  const CARDIO_TYPES = ["Bici spinning","Cinta - correr","Cinta - andar","Escaleras","Elíptica","Remo"];
+  const CARDIO_TYPES = ["Bici spinning","Cinta - correr","Cinta - andar","Escaleras","Elíptica","Remo","MTB / Ciclismo"];
 
   const DEFAULT_ROUTINE = [
     { name:"Pecho", exercises:[
@@ -308,11 +309,13 @@
     });
     bodyweight.sort((a,b)=>a.date.localeCompare(b.date));
 
-    const localCardioKeys = new Set(cardio.map(c=>[c.date,c.activity,c.minutes,c.distance,c.calories].join('|')));
+    const cardioKey = c => [c.date,c.activity,c.minutes,c.distance,c.calories,c.elevation||0,c.avgSpeed||0,c.avgHR||0,c.maxHR||0].join('|');
+    const localCardioKeys = new Set(cardio.map(cardioKey));
     (remote.cardio||[]).forEach(rc=>{
-      const key = [rc.date,rc.activity,rc.minutes,rc.distance,rc.calories].join('|');
+      const key = cardioKey(rc);
       if(!localCardioKeys.has(key)){
-        cardio.push({ id:uid(), date:rc.date, activity:rc.activity, minutes:rc.minutes, distance:rc.distance, calories:rc.calories });
+        cardio.push({ id:uid(), date:rc.date, activity:rc.activity, minutes:rc.minutes, distance:rc.distance, calories:rc.calories,
+          elevation:rc.elevation||0, avgSpeed:rc.avgSpeed||0, avgHR:rc.avgHR||0, maxHR:rc.maxHR||0 });
         localCardioKeys.add(key);
         addedCardio++;
       }
@@ -518,7 +521,11 @@
     }
     const exNames = allExerciseNames();
     const usedNames = new Set(draft.exercises.map(e=>e.name));
-    const options = exNames.filter(n=>!usedNames.has(n)).map(n=>`<option value="${n}">${n}</option>`).join('');
+    const availableNames = exNames.filter(n=>!usedNames.has(n));
+    const groupedEx = {};
+    availableNames.forEach(n=>{ const z = exerciseZone(n); (groupedEx[z]=groupedEx[z]||[]).push(n); });
+    const orderZonesEx = ZONES.concat(['Otros']).filter(z=>groupedEx[z] && groupedEx[z].length);
+    const options = orderZonesEx.map(z=>`<optgroup label="${zoneLabel(z)}">${groupedEx[z].map(n=>`<option value="${n}">${n}</option>`).join('')}</optgroup>`).join('');
 
     const blocks = draft.exercises.map((ex,exIdx)=>{
       const rows = ex.sets.map((s,si)=>{
@@ -560,9 +567,10 @@
       <div class="kicker" style="color:var(--text-dim);font-size:13px;margin-bottom:14px;">${draft.dayName || 'Entreno libre'} · ${fmtDate(draft.date)}</div>
       ${blocks || '<p style="color:var(--text-dim);font-size:14px;">Añade un ejercicio para empezar.</p>'}
       <div class="add-ex-row">
-        <select id="addExSelect"><option value="">Añadir ejercicio…</option>${options}</select>
+        <select id="addExSelect"><option value="">Añadir ejercicio…</option>${options}<option value="__custom__">✏️ Otro ejercicio (escribir)…</option></select>
         <button class="btn btn-secondary" style="width:auto;padding:10px 14px;" data-action="add-ex">Añadir</button>
       </div>
+      <input type="text" id="addExCustomInput" placeholder="Nombre del ejercicio" style="display:none;margin:-10px 0 16px;">
       <div class="btn-row">
         <button class="btn btn-ghost" data-action="discard">Descartar</button>
         <button class="btn btn-primary" data-action="save-session">Guardar entreno</button>
@@ -573,12 +581,33 @@
   function renderCardioForm(){
     if(!pendingCardio){
       const lastActivity = cardio.length ? cardio[cardio.length-1].activity : CARDIO_TYPES[0];
-      pendingCardio = { activity: lastActivity, minutes: 30, distance: 5, calories: 0 };
+      pendingCardio = { activity: lastActivity, minutes: 30, distance: 5, calories: 0, elevation: 0, avgSpeed: 0, avgHR: 0, maxHR: 0 };
     }
     const isStairs = pendingCardio.activity === 'Escaleras';
+    const isMTB = pendingCardio.activity === 'MTB / Ciclismo';
     const distUnit = isStairs ? 'pisos' : 'km';
-    const distStep = isStairs ? 1 : 0.5;
     const opts = CARDIO_TYPES.map(a=>`<option value="${a}" ${a===pendingCardio.activity?'selected':''}>${a}</option>`).join('');
+    const mtbFields = isMTB ? `
+          <div><span class="stepper-label">Desnivel (m)</span><div class="stepper">
+            <button data-action="dec-cele">−</button>
+            <span class="val" id="cEleVal">${pendingCardio.elevation}</span>
+            <button data-action="inc-cele">+</button>
+          </div></div>
+          <div><span class="stepper-label">Vel. media (km/h)</span><div class="stepper">
+            <button data-action="dec-cspd">−</button>
+            <span class="val" id="cSpdVal">${pendingCardio.avgSpeed}</span>
+            <button data-action="inc-cspd">+</button>
+          </div></div>
+          <div><span class="stepper-label">FC media</span><div class="stepper">
+            <button data-action="dec-chr">−</button>
+            <span class="val" id="cHrVal">${pendingCardio.avgHR}</span>
+            <button data-action="inc-chr">+</button>
+          </div></div>
+          <div><span class="stepper-label">FC máxima</span><div class="stepper">
+            <button data-action="dec-cmhr">−</button>
+            <span class="val" id="cMhrVal">${pendingCardio.maxHR}</span>
+            <button data-action="inc-cmhr">+</button>
+          </div></div>` : '';
     return `<div>
       <div class="kicker" style="color:var(--text-dim);font-size:13px;margin-bottom:14px;">Cardio · ${fmtDate(todayISO())}</div>
       <div class="log-ex" style="padding:16px;">
@@ -598,7 +627,7 @@
             <button data-action="dec-ccal">−</button>
             <span class="val" id="cCalVal">${pendingCardio.calories}</span>
             <button data-action="inc-ccal">+</button>
-          </div></div>
+          </div></div>${mtbFields}
         </div>
       </div>
       <div class="btn-row">
@@ -663,7 +692,14 @@
     const values = hist.slice(-12).map(c=>c.minutes);
     const chart = renderSparkline(values, ' min');
     const rows = hist.slice().reverse().slice(0,10).map(c=>{
-      const extra = [c.distance ? `${c.distance} ${distUnit}` : null, c.calories ? `${c.calories} kcal` : null].filter(Boolean).join(' · ');
+      const extra = [
+        c.distance ? `${c.distance} ${distUnit}` : null,
+        c.calories ? `${c.calories} kcal` : null,
+        c.elevation ? `${c.elevation}m desnivel` : null,
+        c.avgSpeed ? `${c.avgSpeed}km/h` : null,
+        c.avgHR ? `FC ${c.avgHR}` : null,
+        c.maxHR ? `máx ${c.maxHR}` : null
+      ].filter(Boolean).join(' · ');
       return `<div class="hist-row"><span class="date">${fmtDate(c.date)}</span><span class="sets">${c.minutes} min${extra ? ' · '+extra : ''}</span></div>`;
     }).join('');
     return `<div class="chart-wrap">
@@ -674,12 +710,36 @@
     </div>`;
   }
 
+  function renderZoneSummary(){
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-28);
+    const counts = {}; ZONES.forEach(z=>counts[z]=0);
+    sessions.forEach(s=>{
+      const d = new Date(s.date+'T00:00:00');
+      if(d < cutoff) return;
+      const zonesInSession = new Set((s.exercises||[]).map(e=>e.zone));
+      zonesInSession.forEach(z=>{ if(counts[z]!==undefined) counts[z]++; });
+    });
+    const max = Math.max(1, ...Object.values(counts));
+    const bars = ZONES.map(z=>{
+      const pct = Math.round((counts[z]/max)*100);
+      return `<div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);margin-bottom:4px;"><span>${z}</span><span>${counts[z]} sesión(es)</span></div>
+        <div style="background:var(--steel);border-radius:4px;height:8px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:var(--zone-${z.toLowerCase()});"></div></div>
+      </div>`;
+    }).join('');
+    return `<div class="chart-wrap">
+      <h3>Resumen por zona (últimos 28 días)</h3>
+      ${bars}
+    </div>`;
+  }
+
   function renderProgreso(){
     const bwSection = renderBodyweightSection();
     const cardioSection = renderCardioSection();
+    const zoneSummary = renderZoneSummary();
     const names = allExerciseNames();
     if(!names.length){
-      return bwSection + cardioSection + `<div class="empty-state"><p>Todavía no hay ejercicios de fuerza registrados.</p></div>`;
+      return bwSection + cardioSection + zoneSummary + `<div class="empty-state"><p>Todavía no hay ejercicios de fuerza registrados.</p></div>`;
     }
     if(!progressExercise || !names.includes(progressExercise)) progressExercise = names[0];
 
@@ -706,7 +766,7 @@
       return `<div class="hist-row"><span class="date">${fmtDate(h.date)}</span><span class="sets">${setsText}${isPR?'<span class="pr-badge">PR</span>':''}</span></div>`;
     }).join('');
 
-    return `${bwSection}${cardioSection}
+    return `${bwSection}${cardioSection}${zoneSummary}
       <div class="zone-select-wrap">
         ${bodyIcon(exerciseZone(progressExercise), 30, 50)}
         <select class="progress-select" id="progressSelect">${optgroups}</select>
@@ -721,12 +781,21 @@
         <div class="rex-row">
           <input type="text" class="rex-name" value="${ex.name}" data-action="ex-field" data-field="name" data-day="${dIdx}" data-ex="${eIdx}">
           <div class="rex-meta">
-            <select data-action="ex-field" data-field="group" data-day="${dIdx}" data-ex="${eIdx}">
-              ${ZONES.map(z=>`<option value="${z}" ${z===ex.group?'selected':''}>${z}</option>`).join('')}
-            </select>
-            <input type="text" class="rex-num" value="${ex.sets}" data-action="ex-field" data-field="sets" data-day="${dIdx}" data-ex="${eIdx}" title="series">
-            <input type="text" class="rex-num" value="${ex.reps}" data-action="ex-field" data-field="reps" data-day="${dIdx}" data-ex="${eIdx}" title="reps">
-            <button class="rm-rex" data-action="rm-rex" data-day="${dIdx}" data-ex="${eIdx}">✕</button>
+            <div class="rex-field" style="flex:1.3;">
+              <span class="stepper-label">Zona</span>
+              <select data-action="ex-field" data-field="group" data-day="${dIdx}" data-ex="${eIdx}">
+                ${ZONES.map(z=>`<option value="${z}" ${z===ex.group?'selected':''}>${z}</option>`).join('')}
+              </select>
+            </div>
+            <div class="rex-field">
+              <span class="stepper-label">Series</span>
+              <input type="text" class="rex-num" value="${ex.sets}" data-action="ex-field" data-field="sets" data-day="${dIdx}" data-ex="${eIdx}">
+            </div>
+            <div class="rex-field">
+              <span class="stepper-label">Reps</span>
+              <input type="text" class="rex-num" value="${ex.reps}" data-action="ex-field" data-field="reps" data-day="${dIdx}" data-ex="${eIdx}">
+            </div>
+            <button class="rm-rex" data-action="rm-rex" data-day="${dIdx}" data-ex="${eIdx}" style="align-self:flex-end;">✕</button>
           </div>
         </div>`).join('');
       return `<div class="day-block">
@@ -807,9 +876,30 @@
       document.getElementById('cCalVal').textContent = pendingCardio.calories;
       return;
     }
+    if(action==='inc-cele' || action==='dec-cele'){
+      pendingCardio.elevation = Math.max(0, pendingCardio.elevation + (action==='inc-cele'?10:-10));
+      document.getElementById('cEleVal').textContent = pendingCardio.elevation;
+      return;
+    }
+    if(action==='inc-cspd' || action==='dec-cspd'){
+      pendingCardio.avgSpeed = Math.max(0, Math.round((pendingCardio.avgSpeed + (action==='inc-cspd'?0.5:-0.5))*10)/10);
+      document.getElementById('cSpdVal').textContent = pendingCardio.avgSpeed;
+      return;
+    }
+    if(action==='inc-chr' || action==='dec-chr'){
+      pendingCardio.avgHR = Math.max(0, pendingCardio.avgHR + (action==='inc-chr'?1:-1));
+      document.getElementById('cHrVal').textContent = pendingCardio.avgHR;
+      return;
+    }
+    if(action==='inc-cmhr' || action==='dec-cmhr'){
+      pendingCardio.maxHR = Math.max(0, pendingCardio.maxHR + (action==='inc-cmhr'?1:-1));
+      document.getElementById('cMhrVal').textContent = pendingCardio.maxHR;
+      return;
+    }
     if(action==='save-cardio'){
       const rec = { date:todayISO(), activity:pendingCardio.activity,
-        minutes:pendingCardio.minutes, distance:pendingCardio.distance, calories:pendingCardio.calories };
+        minutes:pendingCardio.minutes, distance:pendingCardio.distance, calories:pendingCardio.calories,
+        elevation:pendingCardio.elevation||0, avgSpeed:pendingCardio.avgSpeed||0, avgHR:pendingCardio.avgHR||0, maxHR:pendingCardio.maxHR||0 };
       const newId = uid();
       cardio.push(Object.assign({id:newId}, rec));
       await setJSON('cardio', cardio);
@@ -841,7 +931,11 @@
 
     if(action==='add-ex'){
       const sel = document.getElementById('addExSelect');
-      const name = sel.value;
+      let name = sel.value;
+      if(name==='__custom__'){
+        const customInput = document.getElementById('addExCustomInput');
+        name = customInput ? customInput.value.trim() : '';
+      }
       if(!name) return;
       const tpl = findTemplate(name);
       const s = tpl ? suggestFor(tpl) : {weight:0, reps:10};
@@ -935,7 +1029,7 @@
       if(!syncUrl){ alert('Primero guarda la URL de Apps Script.'); return; }
       sessions.forEach(s=>pushRecord('session', { date:s.date, dayName:s.dayName, exercises:s.exercises }, 'session:'+s.id));
       bodyweight.forEach(b=>pushRecord('bodyweight', { date:b.date, weight:b.weight }, 'bw:'+b.date+':'+b.weight));
-      cardio.forEach(c=>pushRecord('cardio', { date:c.date, activity:c.activity, minutes:c.minutes, distance:c.distance, calories:c.calories }, 'cardio:'+c.id));
+      cardio.forEach(c=>pushRecord('cardio', { date:c.date, activity:c.activity, minutes:c.minutes, distance:c.distance, calories:c.calories, elevation:c.elevation||0, avgSpeed:c.avgSpeed||0, avgHR:c.avgHR||0, maxHR:c.maxHR||0 }, 'cardio:'+c.id));
       alert('Enviando lo que falte por sincronizar. Los registros que ya se enviaron antes no se duplican.');
       return;
     }
@@ -972,7 +1066,7 @@
         sessions = (data.sessions||[]).map(s=>({ id:uid(), date:s.date, dayName:s.dayName, exercises:s.exercises||[] }));
         bodyweight = (data.bodyweight||[]).reduce((acc,b)=>{ acc[b.date] = b.weight; return acc; }, {});
         bodyweight = Object.keys(bodyweight).sort().map(date=>({date, weight:bodyweight[date]}));
-        cardio = (data.cardio||[]).map(c=>({ id:uid(), date:c.date, activity:c.activity, minutes:c.minutes, distance:c.distance, calories:c.calories }));
+        cardio = (data.cardio||[]).map(c=>({ id:uid(), date:c.date, activity:c.activity, minutes:c.minutes, distance:c.distance, calories:c.calories, elevation:c.elevation||0, avgSpeed:c.avgSpeed||0, avgHR:c.avgHR||0, maxHR:c.maxHR||0 }));
         await setJSON('sessions', sessions);
         await setJSON('bodyweight', bodyweight);
         await setJSON('cardio', cardio);
@@ -1027,6 +1121,11 @@
     if(e.target.id==='progressSelect'){
       progressExercise = e.target.value;
       render();
+      return;
+    }
+    if(e.target.id==='addExSelect'){
+      const customInput = document.getElementById('addExCustomInput');
+      if(customInput) customInput.style.display = e.target.value==='__custom__' ? 'block' : 'none';
       return;
     }
     if(e.target.id==='cardioActivitySelect'){
