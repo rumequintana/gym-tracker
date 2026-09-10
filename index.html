@@ -24,6 +24,7 @@
     --zone-piernas:#7a9b57;
     --zone-brazos:#6a7fd4;
     --zone-core:#4f9d94;
+    --cardio-dot:#c1508a;
   }
   *{box-sizing:border-box;}
   @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important;} }
@@ -348,7 +349,10 @@
     now.setHours(0,0,0,0);
     return Math.round((now-then)/86400000);
   }
-  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function todayISO(){
+    const d = new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
   function allExerciseNames(){
     const names = new Set();
     routine.forEach(d=>d.exercises.forEach(e=>names.add(e.name)));
@@ -775,7 +779,7 @@
       let dots = '';
       if(info){
         dots = Array.from(info.zones).map(z=>`<span class="cal-dot" style="background:${zoneDotColor(z)};"></span>`).join('');
-        if(info.cardio) dots += `<span class="cal-dot" style="background:var(--brass);"></span>`;
+        if(info.cardio) dots += `<span class="cal-dot" style="background:var(--cardio-dot);"></span>`;
       }
       cells += `<button class="cal-cell ${isToday?'cal-today':''} ${info?'cal-has-data':''}" data-action="cal-select" data-date="${dateStr}">
           <span>${day}</span>
@@ -803,6 +807,10 @@
       </div>
       <div class="cal-grid cal-header-row">${header}</div>
       <div class="cal-grid">${cells}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;">
+        ${ZONES.map(z=>`<span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-dim);"><span class="cal-dot" style="background:${zoneDotColor(z)};"></span>${z}</span>`).join('')}
+        <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-dim);"><span class="cal-dot" style="background:var(--cardio-dot);"></span>Cardio</span>
+      </div>
       ${detail}
     </div>`;
   }
