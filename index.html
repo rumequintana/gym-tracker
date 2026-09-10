@@ -133,6 +133,16 @@
   .bw-add-row{ display:flex; align-items:center; gap:12px; margin-top:12px; }
   .bw-add-row .add-btn{ margin-left:auto; background:var(--olive); border:none; color:#1c1b1a; font-weight:600; border-radius:8px; padding:10px 14px; font-family:'Oswald',sans-serif; cursor:pointer; }
   .bw-hist{ margin-top:6px; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .cal-header-row{ margin-bottom:6px; }
+  .cal-weekday{ text-align:center; font-size:11px; color:var(--text-dim); }
+  .cal-cell{ aspect-ratio:1; background:var(--bg-elev); border:1px solid var(--steel); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--text); font-size:12px; cursor:pointer; padding:2px; }
+  .cal-empty{ background:transparent; border:none; cursor:default; }
+  .cal-today{ border-color:var(--accent); border-width:2px; }
+  .cal-has-data{ background:var(--bg-card); }
+  .cal-dots{ display:flex; gap:2px; flex-wrap:wrap; justify-content:center; min-height:6px; }
+  .cal-dot{ width:5px; height:5px; border-radius:50%; }
+  .cal-nav{ background:none; border:1px solid var(--steel); color:var(--text); border-radius:6px; padding:4px 12px; font-size:16px; cursor:pointer; }
 
   /* ---- Rutina ---- */
   .day-block{ background:var(--bg-card); border:1px solid var(--steel); border-radius:var(--radius); padding:14px; margin-bottom:16px; }
@@ -241,6 +251,8 @@
   let cardioFormOpen = false;
   let pendingCardio = null;
   let progressCardioActivity = null;
+  let calendarMonthOffset = 0;
+  let calendarSelectedDate = null;
 
   const STORAGE_PREFIX = "gymlog_";
   function getJSON(key, fallback){
@@ -733,13 +745,76 @@
     </div>`;
   }
 
+  function renderCalendar(){
+    const base = new Date();
+    base.setDate(1);
+    base.setMonth(base.getMonth() + calendarMonthOffset);
+    const year = base.getFullYear(), month = base.getMonth();
+    const monthNames = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    const startOffset = (new Date(year, month, 1).getDay() + 6) % 7; // lunes=0
+
+    const dayData = {};
+    const ensure = d => { if(!dayData[d]) dayData[d] = { zones:new Set(), cardio:false, bw:false }; return dayData[d]; };
+    sessions.forEach(s=>{
+      const dt = ensure(s.date);
+      (s.exercises||[]).forEach(e=>dt.zones.add(e.zone));
+    });
+    cardio.forEach(c=>{ ensure(c.date).cardio = true; });
+    bodyweight.forEach(b=>{ ensure(b.date).bw = true; });
+
+    const todayStr = todayISO();
+    const zoneDotColor = z => `var(--zone-${ZONES.includes(z) ? z.toLowerCase() : 'core'})`;
+
+    let cells = '';
+    for(let i=0;i<startOffset;i++) cells += `<div class="cal-cell cal-empty"></div>`;
+    for(let day=1; day<=daysInMonth; day++){
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const info = dayData[dateStr];
+      const isToday = dateStr===todayStr;
+      let dots = '';
+      if(info){
+        dots = Array.from(info.zones).map(z=>`<span class="cal-dot" style="background:${zoneDotColor(z)};"></span>`).join('');
+        if(info.cardio) dots += `<span class="cal-dot" style="background:var(--brass);"></span>`;
+      }
+      cells += `<button class="cal-cell ${isToday?'cal-today':''} ${info?'cal-has-data':''}" data-action="cal-select" data-date="${dateStr}">
+          <span>${day}</span>
+          <span class="cal-dots">${dots}</span>
+        </button>`;
+    }
+    const weekdayLabels = ['L','M','X','J','V','S','D'];
+    const header = weekdayLabels.map(w=>`<div class="cal-weekday">${w}</div>`).join('');
+
+    let detail = '';
+    if(calendarSelectedDate){
+      const info = dayData[calendarSelectedDate];
+      const parts = [];
+      if(info && info.zones.size) parts.push('Fuerza: ' + Array.from(info.zones).map(zoneLabel).join(', '));
+      if(info && info.cardio) parts.push('Cardio registrado');
+      if(info && info.bw) parts.push('Peso registrado');
+      detail = `<div style="margin-top:12px;font-size:13px;color:var(--text-dim);"><strong style="color:var(--text);">${fmtDate(calendarSelectedDate)}</strong> — ${parts.join(' · ') || 'Sin actividad ese día'}</div>`;
+    }
+
+    return `<div class="chart-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <button class="cal-nav" data-action="cal-prev">‹</button>
+        <h3 style="margin:0;text-transform:capitalize;font-size:15px;color:var(--text);">${monthNames[month]} ${year}</h3>
+        <button class="cal-nav" data-action="cal-next">›</button>
+      </div>
+      <div class="cal-grid cal-header-row">${header}</div>
+      <div class="cal-grid">${cells}</div>
+      ${detail}
+    </div>`;
+  }
+
   function renderProgreso(){
     const bwSection = renderBodyweightSection();
     const cardioSection = renderCardioSection();
     const zoneSummary = renderZoneSummary();
+    const calendarSection = renderCalendar();
     const names = allExerciseNames();
     if(!names.length){
-      return bwSection + cardioSection + zoneSummary + `<div class="empty-state"><p>Todavía no hay ejercicios de fuerza registrados.</p></div>`;
+      return bwSection + cardioSection + zoneSummary + calendarSection + `<div class="empty-state"><p>Todavía no hay ejercicios de fuerza registrados.</p></div>`;
     }
     if(!progressExercise || !names.includes(progressExercise)) progressExercise = names[0];
 
@@ -766,7 +841,7 @@
       return `<div class="hist-row"><span class="date">${fmtDate(h.date)}</span><span class="sets">${setsText}${isPR?'<span class="pr-badge">PR</span>':''}</span></div>`;
     }).join('');
 
-    return `${bwSection}${cardioSection}${zoneSummary}
+    return `${bwSection}${cardioSection}${zoneSummary}${calendarSection}
       <div class="zone-select-wrap">
         ${bodyIcon(exerciseZone(progressExercise), 30, 50)}
         <select class="progress-select" id="progressSelect">${optgroups}</select>
@@ -907,6 +982,10 @@
       cardioFormOpen=false; pendingCardio=null;
       render(); return;
     }
+
+    if(action==='cal-prev'){ calendarMonthOffset--; calendarSelectedDate=null; render(); return; }
+    if(action==='cal-next'){ calendarMonthOffset++; calendarSelectedDate=null; render(); return; }
+    if(action==='cal-select'){ calendarSelectedDate = t.dataset.date; render(); return; }
 
     if(action==='go-rutina'){ activeTab='rutina'; render(); return; }
 
