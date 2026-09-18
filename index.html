@@ -198,44 +198,44 @@
 
   const DEFAULT_ROUTINE = [
     { name:"Pecho", exercises:[
-      {name:"Selection Chest Press", group:"Pecho", sets:4, reps:8, inc:2.5, info:"Siéntate en la máquina con las manijas a la altura del pecho; empuja hacia delante sin bloquear los codos del todo y vuelve controlado."},
-      {name:"Selection Incline Chest Press", group:"Pecho", sets:3, reps:10, inc:2, info:"Ajusta el asiento para que las manijas queden a la altura de la parte alta del pecho; empuja en diagonal hacia arriba sin despegar la espalda del respaldo."},
-      {name:"Selection Pectoral (Peck Deck)", group:"Pecho", sets:3, reps:12, inc:1, info:"Codos y antebrazos apoyados en los brazos de la máquina; junta los brazos por delante del pecho en arco, sin usar impulso, y vuelve controlado."},
-      {name:"Chin & Dip asistido", group:"Pecho", sets:3, reps:10, inc:2, info:"Ajusta el contrapeso según tu nivel; baja flexionando el codo hasta 90° y empuja hacia arriba sin encoger los hombros."},
+      {name:"Selection Chest Press (Press banca)", group:"Pecho", sets:4, reps:8, inc:2.5, info:"Siéntate en la máquina con las manijas a la altura del pecho; empuja hacia delante sin bloquear los codos del todo y vuelve controlado."},
+      {name:"Selection Incline Chest Press (Press inclinado)", group:"Pecho", sets:3, reps:10, inc:2, info:"Ajusta el asiento para que las manijas queden a la altura de la parte alta del pecho; empuja en diagonal hacia arriba sin despegar la espalda del respaldo."},
+      {name:"Selection Pectoral (Aperturas de pecho)", group:"Pecho", sets:3, reps:12, inc:1, info:"Codos y antebrazos apoyados en los brazos de la máquina; junta los brazos por delante del pecho en arco, sin usar impulso, y vuelve controlado."},
+      {name:"Chin & Dip asistido (Fondos en paralelas)", group:"Pecho", sets:3, reps:10, inc:2, info:"Ajusta el contrapeso según tu nivel; baja flexionando el codo hasta 90° y empuja hacia arriba sin encoger los hombros."},
       {name:"Plancha", group:"Core", sets:3, reps:40, inc:0, bodyweight:true, unit:"seg", info:"Antebrazos y puntas de los pies en el suelo, cuerpo en línea recta de cabeza a talones; aprieta abdomen y glúteos sin dejar caer la cadera."},
       {name:"Elevación de piernas colgado", group:"Core", sets:3, reps:12, inc:0, bodyweight:true, unit:"reps", info:"Colgado de la barra, eleva las piernas rectas o flexionadas hasta la horizontal controlando el balanceo, sin impulso."},
       {name:"Vacuum abdominal", group:"Core", sets:3, reps:20, inc:0, bodyweight:true, unit:"seg", info:"De pie o a cuatro patas, expulsa todo el aire y mete el ombligo hacia dentro y arriba como si quisieras tocar la columna; aguanta sin coger aire. Trabaja el transverso y la fascia abdominal profunda."},
-      {name:"Selection Total Abdominal", group:"Core", sets:3, reps:15, inc:1, info:"Espalda apoyada en el respaldo acolchado, sujeta las asas y flexiona el tronco hacia delante contrayendo el abdomen, sin tirar con los brazos."},
+      {name:"Selection Total Abdominal (Crunch)", group:"Core", sets:3, reps:15, inc:1, info:"Espalda apoyada en el respaldo acolchado, sujeta las asas y flexiona el tronco hacia delante contrayendo el abdomen, sin tirar con los brazos."},
     ]},
     { name:"Espalda", exercises:[
-      {name:"Selection Lat Machine", group:"Espalda", sets:4, reps:8, inc:2.5, info:"Agarre algo más ancho que los hombros; tira la barra hacia la parte alta del pecho llevando los codos hacia abajo y atrás, sin echar el tronco muy atrás."},
-      {name:"Pure Strength T-Bar Row", group:"Espalda", sets:3, reps:8, inc:2.5, info:"Pecho apoyado en el soporte inclinado; tira de las asas hacia el abdomen apretando los omóplatos, sin usar impulso lumbar."},
-      {name:"Selection Low Row", group:"Espalda", sets:3, reps:10, inc:2, info:"Pecho apoyado en el respaldo, pies firmes en los apoyos; tira de las asas hacia el abdomen juntando los omóplatos al final."},
+      {name:"Selection Lat Machine (Jalón al pecho)", group:"Espalda", sets:4, reps:8, inc:2.5, info:"Agarre algo más ancho que los hombros; tira la barra hacia la parte alta del pecho llevando los codos hacia abajo y atrás, sin echar el tronco muy atrás."},
+      {name:"Pure Strength T-Bar Row (Remo con barra)", group:"Espalda", sets:3, reps:8, inc:2.5, info:"Pecho apoyado en el soporte inclinado; tira de las asas hacia el abdomen apretando los omóplatos, sin usar impulso lumbar."},
+      {name:"Selection Low Row (Remo en máquina)", group:"Espalda", sets:3, reps:10, inc:2, info:"Pecho apoyado en el respaldo, pies firmes en los apoyos; tira de las asas hacia el abdomen juntando los omóplatos al final."},
       {name:"Dual Adjustable Pulley (Face Pull)", group:"Espalda", sets:3, reps:15, inc:1, info:"Polea a la altura de la cara; tira de la cuerda separando las manos hacia las orejas, rotando los hombros hacia fuera."},
       {name:"Superman", group:"Core", sets:3, reps:15, inc:0, bodyweight:true, unit:"reps", info:"Boca abajo, eleva a la vez brazos y piernas estiradas unos centímetros; aprieta la zona lumbar y baja controlado."},
       {name:"Pallof press", group:"Core", sets:3, reps:12, inc:1, info:"De pie, en posición lateral a la polea; empuja la agarradera hacia delante resistiendo la rotación del tronco."},
       {name:"Dead bug", group:"Core", sets:3, reps:12, inc:0, bodyweight:true, unit:"reps", info:"Tumbado boca arriba, brazos arriba y rodillas a 90°; baja un brazo y la pierna contraria a la vez manteniendo la zona lumbar pegada al suelo, sin arquear la espalda."},
-      {name:"Dual Adjustable Pulley (Crunch)", group:"Core", sets:3, reps:12, inc:2.5, info:"De rodillas frente a la polea alta con la cuerda detrás de la cabeza, flexiona el tronco llevando los codos hacia las rodillas contrayendo el abdomen."},
+      {name:"Dual Adjustable Pulley (Crunch en polea)", group:"Core", sets:3, reps:12, inc:2.5, info:"De rodillas frente a la polea alta con la cuerda detrás de la cabeza, flexiona el tronco llevando los codos hacia las rodillas contrayendo el abdomen."},
     ]},
     { name:"Piernas", exercises:[
-      {name:"Smith Machine Squat", group:"Piernas", sets:4, reps:8, inc:2.5, info:"Barra guiada sobre los trapecios; baja llevando la cadera atrás y abajo hasta romper el paralelo, rodillas en línea con los pies."},
-      {name:"Pure Strength Deadlift", group:"Piernas", sets:3, reps:8, inc:2.5, info:"Agarra las asas de la máquina; baja llevando la cadera atrás con la espalda recta hasta notar estiramiento en isquios, sube apretando glúteo."},
-      {name:"Selection Leg Press", group:"Piernas", sets:3, reps:10, inc:5, info:"Pies a la anchura de hombros en la plataforma; baja hasta 90° de rodilla sin despegar la zona lumbar del respaldo."},
-      {name:"Smith Machine Zancadas", group:"Piernas", sets:3, reps:10, inc:2, info:"Barra guiada sobre los trapecios; da un paso adelante y baja hasta que ambas rodillas formen 90°, sin que la rodilla delantera sobrepase mucho la punta del pie."},
-      {name:"Selection Calf", group:"Piernas", sets:4, reps:15, inc:2, info:"De pie en la máquina, sube el talón al máximo y baja controlado hasta notar estiramiento en la pantorrilla."},
+      {name:"Smith Machine Squat (Sentadilla)", group:"Piernas", sets:4, reps:8, inc:2.5, info:"Barra guiada sobre los trapecios; baja llevando la cadera atrás y abajo hasta romper el paralelo, rodillas en línea con los pies."},
+      {name:"Pure Strength Deadlift (Peso muerto rumano)", group:"Piernas", sets:3, reps:8, inc:2.5, info:"Agarra las asas de la máquina; baja llevando la cadera atrás con la espalda recta hasta notar estiramiento en isquios, sube apretando glúteo."},
+      {name:"Selection Leg Press (Prensa)", group:"Piernas", sets:3, reps:10, inc:5, info:"Pies a la anchura de hombros en la plataforma; baja hasta 90° de rodilla sin despegar la zona lumbar del respaldo."},
+      {name:"Smith Machine (Zancadas)", group:"Piernas", sets:3, reps:10, inc:2, info:"Barra guiada sobre los trapecios; da un paso adelante y baja hasta que ambas rodillas formen 90°, sin que la rodilla delantera sobrepase mucho la punta del pie."},
+      {name:"Selection Calf (Elevación de gemelos)", group:"Piernas", sets:4, reps:15, inc:2, info:"De pie en la máquina, sube el talón al máximo y baja controlado hasta notar estiramiento en la pantorrilla."},
       {name:"Selection Adductor", group:"Piernas", sets:3, reps:15, inc:2, info:"Sentado con las piernas abiertas apoyadas en los cojines; junta las piernas contra la resistencia y vuelve controlado."},
       {name:"Selection Abductor", group:"Piernas", sets:3, reps:15, inc:2, info:"Sentado con las piernas juntas apoyadas en los cojines; separa las piernas contra la resistencia y vuelve controlado."},
       {name:"Selection Hip Thrust", group:"Piernas", sets:3, reps:12, inc:5, info:"Espalda apoyada en el respaldo, pies firmes en la plataforma; empuja la cadera hacia arriba apretando el glúteo y baja controlado."},
-      {name:"Selection Rotary Torso", group:"Core", sets:3, reps:20, inc:1, info:"Sentado con el tronco fijado por el respaldo, rota el tronco de lado a lado contra la resistencia de la máquina, sin tirar con los brazos."},
+      {name:"Selection Rotary Torso (Giro de tronco)", group:"Core", sets:3, reps:20, inc:1, info:"Sentado con el tronco fijado por el respaldo, rota el tronco de lado a lado contra la resistencia de la máquina, sin tirar con los brazos."},
       {name:"Vacuum abdominal", group:"Core", sets:3, reps:20, inc:0, bodyweight:true, unit:"seg", info:"De pie o a cuatro patas, expulsa todo el aire y mete el ombligo hacia dentro y arriba como si quisieras tocar la columna; aguanta sin coger aire. Trabaja el transverso y la fascia abdominal profunda."},
       {name:"Crunch bicicleta", group:"Core", sets:3, reps:20, inc:0, bodyweight:true, unit:"reps", info:"Tumbado, lleva el codo hacia la rodilla contraria mientras extiendes la otra pierna, alternando de forma continua y controlada."},
     ]},
     { name:"Brazos", exercises:[
-      {name:"Selection Arm Curl", group:"Brazos", sets:3, reps:10, inc:1, info:"Codos apoyados en el cojín de la máquina; flexiona el codo sin despegar el brazo del apoyo, baja controlado hasta extender casi del todo."},
+      {name:"Selection Arm Curl (Curl bíceps)", group:"Brazos", sets:3, reps:10, inc:1, info:"Codos apoyados en el cojín de la máquina; flexiona el codo sin despegar el brazo del apoyo, baja controlado hasta extender casi del todo."},
       {name:"Curl martillo", group:"Brazos", sets:3, reps:10, inc:1, info:"Con mancuernas en agarre neutro (pulgar hacia arriba), flexiona el codo sin girar la muñeca."},
-      {name:"Selection Triceps Extension", group:"Brazos", sets:3, reps:12, inc:1, info:"Codos pegados al cuerpo, en la máquina o polea; extiende el antebrazo hacia abajo hasta bloquear y vuelve controlado sin abrir los codos."},
+      {name:"Selection Triceps Extension (Extensión tríceps)", group:"Brazos", sets:3, reps:12, inc:1, info:"Codos pegados al cuerpo, en la máquina o polea; extiende el antebrazo hacia abajo hasta bloquear y vuelve controlado sin abrir los codos."},
       {name:"Fondos banco tríceps", group:"Brazos", sets:3, reps:12, inc:2, info:"Manos en el borde del banco; baja flexionando el codo hacia atrás y empuja hasta extender el brazo, cadera cerca del banco."},
-      {name:"Selection Delts Machine", group:"Brazos", sets:3, reps:12, inc:1, info:"Siéntate en la máquina con los brazos apoyados en las almohadillas; eleva los brazos hacia los lados hasta la altura de los hombros, sin impulso."},
+      {name:"Selection Delts Machine (Elevaciones laterales)", group:"Brazos", sets:3, reps:12, inc:1, info:"Siéntate en la máquina con los brazos apoyados en las almohadillas; eleva los brazos hacia los lados hasta la altura de los hombros, sin impulso."},
       {name:"Plancha lateral", group:"Core", sets:3, reps:30, inc:0, bodyweight:true, unit:"seg", info:"Apoyado en un antebrazo y el lateral del pie, mantén el cuerpo en línea recta sin dejar caer la cadera; cambia de lado."},
       {name:"Dead bug", group:"Core", sets:3, reps:12, inc:0, bodyweight:true, unit:"reps", info:"Tumbado boca arriba, brazos arriba y rodillas a 90°; baja un brazo y la pierna contraria a la vez manteniendo la zona lumbar pegada al suelo, sin arquear la espalda."},
       {name:"Crunch con peso", group:"Core", sets:3, reps:15, inc:1, info:"Tumbado con rodillas flexionadas, sujeta un disco o mancuerna contra el pecho y eleva los omóplatos del suelo contrayendo el abdomen."},
@@ -243,26 +243,57 @@
   ];
 
   const TECHNOGYM_RENAMES = {
-    "Press banca": { name:"Selection Chest Press", inc:2.5, info:"Siéntate en la máquina con las manijas a la altura del pecho; empuja hacia delante sin bloquear los codos del todo y vuelve controlado." },
-    "Press inclinado mancuerna": { name:"Selection Incline Chest Press", inc:2, info:"Ajusta el asiento para que las manijas queden a la altura de la parte alta del pecho; empuja en diagonal hacia arriba sin despegar la espalda del respaldo." },
-    "Aperturas mancuerna": { name:"Selection Pectoral (Peck Deck)", inc:1, info:"Codos y antebrazos apoyados en los brazos de la máquina; junta los brazos por delante del pecho en arco, sin usar impulso, y vuelve controlado." },
-    "Fondos en paralelas": { name:"Chin & Dip asistido", inc:2, info:"Ajusta el contrapeso según tu nivel; baja flexionando el codo hasta 90° y empuja hacia arriba sin encoger los hombros." },
-    "Crunch": { name:"Selection Total Abdominal", inc:1, bodyweight:false, info:"Espalda apoyada en el respaldo acolchado, sujeta las asas y flexiona el tronco hacia delante contrayendo el abdomen, sin tirar con los brazos." },
-    "Jalón al pecho": { name:"Selection Lat Machine", inc:2.5, info:"Agarre algo más ancho que los hombros; tira la barra hacia la parte alta del pecho llevando los codos hacia abajo y atrás, sin echar el tronco muy atrás." },
-    "Remo con barra": { name:"Pure Strength T-Bar Row", inc:2.5, info:"Pecho apoyado en el soporte inclinado; tira de las asas hacia el abdomen apretando los omóplatos, sin usar impulso lumbar." },
-    "Remo en máquina": { name:"Selection Low Row", inc:2, info:"Pecho apoyado en el respaldo, pies firmes en los apoyos; tira de las asas hacia el abdomen juntando los omóplatos al final." },
+    "Press banca": { name:"Selection Chest Press (Press banca)", inc:2.5, info:"Siéntate en la máquina con las manijas a la altura del pecho; empuja hacia delante sin bloquear los codos del todo y vuelve controlado." },
+    "Press inclinado mancuerna": { name:"Selection Incline Chest Press (Press inclinado)", inc:2, info:"Ajusta el asiento para que las manijas queden a la altura de la parte alta del pecho; empuja en diagonal hacia arriba sin despegar la espalda del respaldo." },
+    "Aperturas mancuerna": { name:"Selection Pectoral (Aperturas de pecho)", inc:1, info:"Codos y antebrazos apoyados en los brazos de la máquina; junta los brazos por delante del pecho en arco, sin usar impulso, y vuelve controlado." },
+    "Fondos en paralelas": { name:"Chin & Dip asistido (Fondos en paralelas)", inc:2, info:"Ajusta el contrapeso según tu nivel; baja flexionando el codo hasta 90° y empuja hacia arriba sin encoger los hombros." },
+    "Crunch": { name:"Selection Total Abdominal (Crunch)", inc:1, bodyweight:false, info:"Espalda apoyada en el respaldo acolchado, sujeta las asas y flexiona el tronco hacia delante contrayendo el abdomen, sin tirar con los brazos." },
+    "Jalón al pecho": { name:"Selection Lat Machine (Jalón al pecho)", inc:2.5, info:"Agarre algo más ancho que los hombros; tira la barra hacia la parte alta del pecho llevando los codos hacia abajo y atrás, sin echar el tronco muy atrás." },
+    "Remo con barra": { name:"Pure Strength T-Bar Row (Remo con barra)", inc:2.5, info:"Pecho apoyado en el soporte inclinado; tira de las asas hacia el abdomen apretando los omóplatos, sin usar impulso lumbar." },
+    "Remo en máquina": { name:"Selection Low Row (Remo en máquina)", inc:2, info:"Pecho apoyado en el respaldo, pies firmes en los apoyos; tira de las asas hacia el abdomen juntando los omóplatos al final." },
     "Face pull": { name:"Dual Adjustable Pulley (Face Pull)", inc:1, info:"Polea a la altura de la cara; tira de la cuerda separando las manos hacia las orejas, rotando los hombros hacia fuera." },
-    "Crunch en polea": { name:"Dual Adjustable Pulley (Crunch)", inc:2.5, info:"De rodillas frente a la polea alta con la cuerda detrás de la cabeza, flexiona el tronco llevando los codos hacia las rodillas contrayendo el abdomen." },
-    "Sentadilla": { name:"Smith Machine Squat", inc:2.5, info:"Barra guiada sobre los trapecios; baja llevando la cadera atrás y abajo hasta romper el paralelo, rodillas en línea con los pies." },
-    "Peso muerto rumano": { name:"Pure Strength Deadlift", inc:2.5, info:"Agarra las asas de la máquina; baja llevando la cadera atrás con la espalda recta hasta notar estiramiento en isquios, sube apretando glúteo." },
-    "Prensa": { name:"Selection Leg Press", inc:5, info:"Pies a la anchura de hombros en la plataforma; baja hasta 90° de rodilla sin despegar la zona lumbar del respaldo." },
-    "Zancadas": { name:"Smith Machine Zancadas", inc:2, info:"Barra guiada sobre los trapecios; da un paso adelante y baja hasta que ambas rodillas formen 90°, sin que la rodilla delantera sobrepase mucho la punta del pie." },
-    "Elevación de gemelos": { name:"Selection Calf", inc:2, info:"De pie en la máquina, sube el talón al máximo y baja controlado hasta notar estiramiento en la pantorrilla." },
-    "Russian twist": { name:"Selection Rotary Torso", inc:1, bodyweight:false, info:"Sentado con el tronco fijado por el respaldo, rota el tronco de lado a lado contra la resistencia de la máquina, sin tirar con los brazos." },
-    "Curl bíceps barra": { name:"Selection Arm Curl", inc:1, info:"Codos apoyados en el cojín de la máquina; flexiona el codo sin despegar el brazo del apoyo, baja controlado hasta extender casi del todo." },
-    "Extensión tríceps polea": { name:"Selection Triceps Extension", inc:1, info:"Codos pegados al cuerpo, en la máquina o polea; extiende el antebrazo hacia abajo hasta bloquear y vuelve controlado sin abrir los codos." },
-    "Elevaciones laterales": { name:"Selection Delts Machine", inc:1, info:"Siéntate en la máquina con los brazos apoyados en las almohadillas; eleva los brazos hacia los lados hasta la altura de los hombros, sin impulso." },
+    "Crunch en polea": { name:"Dual Adjustable Pulley (Crunch en polea)", inc:2.5, info:"De rodillas frente a la polea alta con la cuerda detrás de la cabeza, flexiona el tronco llevando los codos hacia las rodillas contrayendo el abdomen." },
+    "Sentadilla": { name:"Smith Machine Squat (Sentadilla)", inc:2.5, info:"Barra guiada sobre los trapecios; baja llevando la cadera atrás y abajo hasta romper el paralelo, rodillas en línea con los pies." },
+    "Peso muerto rumano": { name:"Pure Strength Deadlift (Peso muerto rumano)", inc:2.5, info:"Agarra las asas de la máquina; baja llevando la cadera atrás con la espalda recta hasta notar estiramiento en isquios, sube apretando glúteo." },
+    "Prensa": { name:"Selection Leg Press (Prensa)", inc:5, info:"Pies a la anchura de hombros en la plataforma; baja hasta 90° de rodilla sin despegar la zona lumbar del respaldo." },
+    "Zancadas": { name:"Smith Machine (Zancadas)", inc:2, info:"Barra guiada sobre los trapecios; da un paso adelante y baja hasta que ambas rodillas formen 90°, sin que la rodilla delantera sobrepase mucho la punta del pie." },
+    "Elevación de gemelos": { name:"Selection Calf (Elevación de gemelos)", inc:2, info:"De pie en la máquina, sube el talón al máximo y baja controlado hasta notar estiramiento en la pantorrilla." },
+    "Russian twist": { name:"Selection Rotary Torso (Giro de tronco)", inc:1, bodyweight:false, info:"Sentado con el tronco fijado por el respaldo, rota el tronco de lado a lado contra la resistencia de la máquina, sin tirar con los brazos." },
+    "Curl bíceps barra": { name:"Selection Arm Curl (Curl bíceps)", inc:1, info:"Codos apoyados en el cojín de la máquina; flexiona el codo sin despegar el brazo del apoyo, baja controlado hasta extender casi del todo." },
+    "Extensión tríceps polea": { name:"Selection Triceps Extension (Extensión tríceps)", inc:1, info:"Codos pegados al cuerpo, en la máquina o polea; extiende el antebrazo hacia abajo hasta bloquear y vuelve controlado sin abrir los codos." },
+    "Elevaciones laterales": { name:"Selection Delts Machine (Elevaciones laterales)", inc:1, info:"Siéntate en la máquina con los brazos apoyados en las almohadillas; eleva los brazos hacia los lados hasta la altura de los hombros, sin impulso." },
   };
+
+  // Para dispositivos donde ya se pulsó el botón antes de que existieran los paréntesis:
+  // mapea el nombre "solo Technogym" ya aplicado -> nombre final con el término genérico añadido.
+  const TECHNOGYM_PAREN_FIX = {
+    "Selection Chest Press": "Selection Chest Press (Press banca)",
+    "Selection Incline Chest Press": "Selection Incline Chest Press (Press inclinado)",
+    "Selection Pectoral (Peck Deck)": "Selection Pectoral (Aperturas de pecho)",
+    "Chin & Dip asistido": "Chin & Dip asistido (Fondos en paralelas)",
+    "Selection Total Abdominal": "Selection Total Abdominal (Crunch)",
+    "Selection Lat Machine": "Selection Lat Machine (Jalón al pecho)",
+    "Pure Strength T-Bar Row": "Pure Strength T-Bar Row (Remo con barra)",
+    "Selection Low Row": "Selection Low Row (Remo en máquina)",
+    "Dual Adjustable Pulley (Crunch)": "Dual Adjustable Pulley (Crunch en polea)",
+    "Smith Machine Squat": "Smith Machine Squat (Sentadilla)",
+    "Pure Strength Deadlift": "Pure Strength Deadlift (Peso muerto rumano)",
+    "Selection Leg Press": "Selection Leg Press (Prensa)",
+    "Smith Machine Zancadas": "Smith Machine (Zancadas)",
+    "Selection Calf": "Selection Calf (Elevación de gemelos)",
+    "Selection Rotary Torso": "Selection Rotary Torso (Giro de tronco)",
+    "Selection Arm Curl": "Selection Arm Curl (Curl bíceps)",
+    "Selection Triceps Extension": "Selection Triceps Extension (Extensión tríceps)",
+    "Selection Delts Machine": "Selection Delts Machine (Elevaciones laterales)",
+  };
+
+  function isTechnogymMachine(name){
+    return /Selection|Pure Strength|Smith Machine|Chin & Dip|Dual Adjustable Pulley/.test(name);
+  }
+  function technogymSearchUrl(name){
+    const q = name.replace(/\s*\([^)]*\)\s*/g, '').trim();
+    return 'https://www.technogym.com/en-INT/search/?q=' + encodeURIComponent(q);
+  }
 
   let routine = null;
   let sessions = null;
@@ -531,7 +562,7 @@
           <span class="scheme">${schemeText}</span>
         </div>
         <div class="note">${s.note}</div>
-        ${tpl.info ? `<details class="howto"><summary></summary><p>${tpl.info}</p></details>` : ''}
+        ${tpl.info ? `<details class="howto"><summary></summary><p>${tpl.info}</p>${isTechnogymMachine(tpl.name) ? `<a href="${technogymSearchUrl(tpl.name)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:12px;color:var(--brass);">Ver máquina ↗</a>` : ''}</details>` : ''}
       </div>`;
     }).join('');
     return `<div class="hero-day">
@@ -595,7 +626,7 @@
           <div class="log-ex-title">${bodyIcon(ex.zone, 30, 50)}<span class="ex-name">${ex.name}</span></div>
           <button class="rm-ex" data-action="rm-ex" data-ex="${exIdx}">quitar</button>
         </div>
-        ${tplInfo ? `<details class="howto" style="margin:0 14px 10px;padding:0;border:none;"><summary></summary><p>${tplInfo}</p></details>` : ''}
+        ${tplInfo ? `<details class="howto" style="margin:0 14px 10px;padding:0;border:none;"><summary></summary><p>${tplInfo}</p>${isTechnogymMachine(ex.name) ? `<a href="${technogymSearchUrl(ex.name)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:12px;color:var(--brass);">Ver máquina ↗</a>` : ''}</details>` : ''}
         ${rows}
         <div class="add-set">
           ${controls}
@@ -1209,11 +1240,14 @@
             ex.info = map.info;
             if(map.bodyweight===false){ ex.bodyweight = false; delete ex.unit; }
             count++;
+          } else if(TECHNOGYM_PAREN_FIX[ex.name]){
+            ex.name = TECHNOGYM_PAREN_FIX[ex.name];
+            count++;
           }
         });
       });
       await setJSON('routine', routine);
-      alert(count ? `Actualizados ${count} ejercicios a nombres de máquina Technogym.` : 'No había ejercicios con nombre genérico que actualizar (puede que ya estén actualizados).');
+      alert(count ? `Actualizados ${count} ejercicios a nombres de máquina Technogym.` : 'Ya estaban todos actualizados.');
       render();
       return;
     }
