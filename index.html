@@ -292,7 +292,7 @@
   }
   function technogymSearchUrl(name){
     const q = name.replace(/\s*\([^)]*\)\s*/g, '').trim();
-    return 'https://www.technogym.com/en-INT/search/?q=' + encodeURIComponent(q);
+    return 'https://www.google.com/search?q=' + encodeURIComponent('site:technogym.com ' + q);
   }
 
   let routine = null;
