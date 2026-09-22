@@ -975,6 +975,7 @@
           <button class="btn btn-secondary" data-action="save-sync-url">Guardar URL</button>
           <button class="btn btn-primary" data-action="sync-all">Sincronizar todo</button>
         </div>
+        <button class="btn btn-secondary" data-action="resend-today" style="margin-top:10px;">Reenviar lo de hoy otra vez (si no llegó a la hoja)</button>
         <button class="btn btn-secondary" data-action="import-sheet" style="margin-top:10px;">Importar de la hoja</button>
         <button class="btn btn-ghost" data-action="replace-with-sheet" style="margin-top:10px;">Borrar pruebas locales y quedarme solo con la hoja</button>
       </div>
@@ -1199,6 +1200,28 @@
       bodyweight.forEach(b=>pushRecord('bodyweight', { date:b.date, weight:b.weight }, 'bw:'+b.date+':'+b.weight));
       cardio.forEach(c=>pushRecord('cardio', { date:c.date, activity:c.activity, minutes:c.minutes, distance:c.distance, calories:c.calories, elevation:c.elevation||0, avgSpeed:c.avgSpeed||0, avgHR:c.avgHR||0, maxHR:c.maxHR||0 }, 'cardio:'+c.id));
       alert('Enviando lo que falte por sincronizar. Los registros que ya se enviaron antes no se duplican.');
+      return;
+    }
+    if(action==='resend-today'){
+      if(!syncUrl){ alert('Primero guarda la URL de Apps Script.'); return; }
+      const today = todayISO();
+      let n = 0;
+      sessions.filter(s=>s.date===today).forEach(s=>{
+        syncedKeys.delete('session:'+s.id);
+        pushRecord('session', { date:s.date, dayName:s.dayName, exercises:s.exercises }, 'session:'+s.id);
+        n++;
+      });
+      bodyweight.filter(b=>b.date===today).forEach(b=>{
+        syncedKeys.delete('bw:'+b.date+':'+b.weight);
+        pushRecord('bodyweight', { date:b.date, weight:b.weight }, 'bw:'+b.date+':'+b.weight);
+        n++;
+      });
+      cardio.filter(c=>c.date===today).forEach(c=>{
+        syncedKeys.delete('cardio:'+c.id);
+        pushRecord('cardio', { date:c.date, activity:c.activity, minutes:c.minutes, distance:c.distance, calories:c.calories, elevation:c.elevation||0, avgSpeed:c.avgSpeed||0, avgHR:c.avgHR||0, maxHR:c.maxHR||0 }, 'cardio:'+c.id);
+        n++;
+      });
+      alert(n ? `Reenviado lo de hoy (${n} registro(s)). Espera unos segundos y comprueba la hoja.` : 'No hay nada registrado hoy en este dispositivo.');
       return;
     }
 
